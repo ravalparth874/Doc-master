@@ -75,7 +75,8 @@ doc-master/
 │   │       └── validation.py       # magic bytes, sizes, page ranges
 │   ├── tests/                      # pytest: merge, split, compress, tools
 │   ├── requirements.txt
-│   └── pyproject.toml              # ruff + pytest configuration
+│   ├── ruff.toml                   # ruff configuration
+│   └── pytest.ini                  # pytest configuration
 ├── frontend/
 │   ├── public/                     # favicons, manifest, service worker, robots, sitemap
 │   ├── scripts/                    # sitemap generator + pre-renderer

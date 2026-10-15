@@ -1,0 +1,18 @@
+# Ruff configuration.
+#
+# This lives in ruff.toml rather than pyproject.toml on purpose: Vercel's Python
+# runtime switches to `uv` as soon as a pyproject.toml exists, and `uv lock`
+# expects a full [project] table. Keeping the tooling config separate lets the
+# backend stay a plain requirements.txt project, which is what Docker, CI and the
+# local virtualenv already use.
+
+line-length = 100
+target-version = "py311"
+src = ["app", "tests"]
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = ["B008", "SIM105"]
+
+[lint.per-file-ignores]
+"tests/*" = ["E402"]
