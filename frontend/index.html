@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <!-- Baseline SEO tags. They are removed from pre-rendered pages and replaced by
+         per-page tags from react-helmet-async, and are pruned on the client if a page
+         is rendered in the browser. -->
+    <!--seo-baseline-start-->
+    <title data-static-seo>
+      DOC Master – All Your PDF Tools in One Place. Free, Fast &amp; Private
+    </title>
+    <meta
+      data-static-seo
+      name="description"
+      content="Free online PDF toolkit: merge, split, compress to 200KB, convert images to PDF, rotate and password protect PDFs. No signup, no watermark, files deleted instantly."
+    />
+    <meta data-static-seo name="robots" content="index, follow, max-image-preview:large" />
+    <link data-static-seo rel="canonical" href="https://docmaster.example/" />
+    <meta data-static-seo property="og:type" content="website" />
+    <meta data-static-seo property="og:site_name" content="DOC Master" />
+    <meta
+      data-static-seo
+      property="og:title"
+      content="DOC Master – All Your PDF Tools in One Place. Free, Fast &amp; Private"
+    />
+    <meta
+      data-static-seo
+      property="og:description"
+      content="Free online PDF toolkit: merge, split, compress to 200KB, convert images to PDF, rotate and password protect PDFs. No signup, files deleted instantly."
+    />
+    <meta data-static-seo property="og:url" content="https://docmaster.example/" />
+    <meta data-static-seo property="og:image" content="https://docmaster.example/og-image.png" />
+    <meta data-static-seo property="og:image:width" content="1200" />
+    <meta data-static-seo property="og:image:height" content="630" />
+    <meta data-static-seo name="twitter:card" content="summary_large_image" />
+    <meta
+      data-static-seo
+      name="twitter:title"
+      content="DOC Master – All Your PDF Tools in One Place. Free, Fast &amp; Private"
+    />
+    <meta
+      data-static-seo
+      name="twitter:description"
+      content="Free online PDF toolkit to merge, split, compress, convert and protect PDF files. No signup, files deleted instantly."
+    />
+    <meta data-static-seo name="twitter:image" content="https://docmaster.example/og-image.png" />
+    <!--seo-baseline-end-->
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="DOC Master" />
+    <meta name="application-name" content="DOC Master" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Optional analytics, injected by the backend when ANALYTICS_ID is set. -->
+    <!--ANALYTICS-->
+
+    <script>
+      // Apply the saved colour scheme before first paint to avoid a flash.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('doc-master-theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          var theme =
+            stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light'
+          document.documentElement.classList.toggle('dark', theme === 'dark')
+          document.documentElement.style.colorScheme = theme
+
+          var lang = localStorage.getItem('doc-master-language')
+          if (lang === 'hi' || lang === 'gu') {
+            document.documentElement.lang = lang
+          }
+        } catch (error) {
+          /* storage blocked: fall back to the light theme */
+        }
+      })()
+    </script>
+  </head>
+  <body class="min-h-screen">
+    <div id="root"><!--app-html--></div>
+    <noscript>
+      <div style="max-width: 40rem; margin: 3rem auto; padding: 0 1rem; font-family: system-ui">
+        <h1>DOC Master</h1>
+        <p>
+          This PDF toolkit needs JavaScript to merge, split and compress documents in your browser.
+          Please enable JavaScript and reload this page.
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

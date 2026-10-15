@@ -1,0 +1,30 @@
+# Render blueprint for DOC Master.
+# Create a Blueprint from the repository root: render.yaml is picked up automatically.
+
+services:
+  - type: web
+    name: doc-master
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter # the free plan has a 100 MB memory limit, fine for small files
+    region: singapore # change to oregon / frankfurt / virginia as needed
+    branch: main
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: MAX_FILE_MB
+        value: "25"
+      - key: MAX_TOTAL_MB
+        value: "120"
+      - key: MAX_FILES
+        value: "20"
+      - key: SITE_URL
+        sync: false # set your real domain in the Render dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false # set your real domain, for example https://docmaster.app
+      - key: RATE_LIMIT
+        value: "20/minute"
+      - key: ANALYTICS_ID
+        sync: false # leave empty to collect no analytics

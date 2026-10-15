@@ -1,0 +1,24 @@
+# Build context
+.git
+.github
+**/.git
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/node_modules
+**/dist
+**/dist-ssr
+**/.vite
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/.DS_Store
+docs/screenshots
+README.md
+DEPLOYMENT.md
+SEO_CHECKLIST.md

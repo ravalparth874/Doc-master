@@ -1,0 +1,9 @@
+# DOC Master - robots.txt
+# Your files are processed in memory and never stored.
+User-agent: *
+Allow: /
+
+# API endpoints are not useful to crawlers
+Disallow: /api/
+
+Sitemap: https://docmaster.example/sitemap.xml

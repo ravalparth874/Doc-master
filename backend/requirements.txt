@@ -1,0 +1,11 @@
+# DOC Master backend - runtime dependencies
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pypdf>=5.0,<7.0
+cryptography>=42.0
+PyMuPDF>=1.24.3,<2.0
+img2pdf>=0.5,<1.0
+Pillow>=10.4,<13.0
+python-multipart>=0.0.12
+python-dotenv>=1.0,<2.0
+slowapi>=0.1.9,<1.0

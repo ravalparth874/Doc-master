@@ -1,0 +1,86 @@
+[
+  {
+    "path": "/",
+    "name": "Home",
+    "prerender": true,
+    "priority": "1.0",
+    "changefreq": "weekly"
+  },
+  {
+    "path": "/merge-pdf",
+    "name": "Merge PDF",
+    "prerender": true,
+    "priority": "0.9",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/split-pdf",
+    "name": "Split PDF",
+    "prerender": true,
+    "priority": "0.9",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/compress-pdf",
+    "name": "Compress PDF",
+    "prerender": true,
+    "priority": "0.9",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/images-to-pdf",
+    "name": "Images to PDF",
+    "prerender": true,
+    "priority": "0.9",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/pdf-to-images",
+    "name": "PDF to Images",
+    "prerender": true,
+    "priority": "0.8",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/rotate-pdf",
+    "name": "Rotate PDF",
+    "prerender": true,
+    "priority": "0.8",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/protect-pdf",
+    "name": "Protect PDF",
+    "prerender": true,
+    "priority": "0.8",
+    "changefreq": "monthly"
+  },
+  {
+    "path": "/about",
+    "name": "About",
+    "prerender": true,
+    "priority": "0.5",
+    "changefreq": "yearly"
+  },
+  {
+    "path": "/privacy",
+    "name": "Privacy Policy",
+    "prerender": true,
+    "priority": "0.4",
+    "changefreq": "yearly"
+  },
+  {
+    "path": "/terms",
+    "name": "Terms of Use",
+    "prerender": true,
+    "priority": "0.4",
+    "changefreq": "yearly"
+  },
+  {
+    "path": "/contact",
+    "name": "Contact",
+    "prerender": true,
+    "priority": "0.4",
+    "changefreq": "yearly"
+  }
+]

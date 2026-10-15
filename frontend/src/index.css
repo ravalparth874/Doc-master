@@ -1,0 +1,161 @@
+@import 'tailwindcss';
+
+@import '@fontsource-variable/inter';
+
+/* Class based dark mode, toggled from the header and stored in localStorage. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans',
+    'Noto Sans Devanagari', 'Noto Sans Gujarati', sans-serif;
+
+  --color-brand-50: oklch(0.97 0.014 285);
+  --color-brand-100: oklch(0.94 0.03 285);
+  --color-brand-200: oklch(0.88 0.06 285);
+  --color-brand-300: oklch(0.79 0.11 286);
+  --color-brand-400: oklch(0.68 0.17 288);
+  --color-brand-500: oklch(0.58 0.22 291);
+  --color-brand-600: oklch(0.51 0.24 293);
+  --color-brand-700: oklch(0.44 0.22 294);
+  --color-brand-800: oklch(0.37 0.18 295);
+  --color-brand-900: oklch(0.31 0.15 296);
+
+  --color-accent-500: oklch(0.65 0.2 305);
+  --color-accent-600: oklch(0.56 0.22 306);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200;
+    /* Long file names or unbroken words must never create a sideways scrollbar. */
+    overflow-x: clip;
+  }
+
+  /* Inputs keep a 16px size on phones so iOS never zooms the page on focus. */
+  input,
+  select,
+  textarea {
+    font-size: max(1rem, 0.875rem);
+  }
+
+  @media (min-width: 640px) {
+    input,
+    select,
+    textarea {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Remove the 300ms tap delay and stop double-tap zoom on interactive controls. */
+  button,
+  label,
+  a,
+  select,
+  summary {
+    touch-action: manipulation;
+  }
+
+  /* Visible keyboard focus everywhere, including dark mode. */
+  :focus-visible {
+    @apply outline-brand-600 outline-2 outline-offset-2 dark:outline-brand-400;
+  }
+
+  ::selection {
+    @apply bg-brand-500/25;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Keep the header and footer clear of notches and home indicators. */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* One shared base rule keeps the variants free of duplicated declarations. */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition focus-visible:outline-2 focus-visible:outline-offset-2
+      disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-sm
+      hover:from-brand-500 hover:to-accent-500;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-700 hover:bg-slate-50
+      dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
+  }
+
+  .btn-ghost {
+    @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900
+      dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white;
+  }
+
+  /* Icon-only buttons need a 44px target on touch screens. The padding must be
+     reset here: without it the inherited px-4 would eat the fixed width and flex
+     would shrink the icon down to a few pixels. */
+  .btn-icon {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-xl p-0;
+  }
+
+  .btn-icon > svg {
+    @apply shrink-0;
+  }
+
+  .field {
+    @apply min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900
+      placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none
+      dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200;
+  }
+
+  .prose-page {
+    @apply text-slate-600 dark:text-slate-300;
+  }
+
+  /* Radio and checkbox cards: big enough to tap comfortably. */
+  .choice {
+    @apply flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm;
+  }
+
+  .choice-label {
+    @apply flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

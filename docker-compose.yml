@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: doc-master:latest
+    container_name: doc-master
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      PORT: "8000"
+      MAX_FILE_MB: "${MAX_FILE_MB:-25}"
+      MAX_TOTAL_MB: "${MAX_TOTAL_MB:-120}"
+      MAX_FILES: "${MAX_FILES:-20}"
+      SITE_URL: "${SITE_URL:-https://docmaster.example}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:5173}"
+      RATE_LIMIT: "${RATE_LIMIT:-20/minute}"
+      ANALYTICS_ID: "${ANALYTICS_ID:-}"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
