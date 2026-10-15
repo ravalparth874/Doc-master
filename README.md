@@ -216,9 +216,17 @@ See `.env.example` for the full list.
 | `RATE_LIMIT_DISABLED` | `false` | Turn the limiter off (useful in tests) |
 | `FRONTEND_DIST` | `frontend/dist` | Where the built frontend lives |
 
-`SITE_URL` is applied at **serve time**: pre-rendered HTML contains a placeholder origin
-and the backend swaps it for your real domain, so canonical URLs are correct without a
-rebuild.
+### Frontend (build time, baked into the bundle)
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_API_URL` | *(empty)* | Full origin of the API when it is hosted separately |
+| `VITE_SITE_URL` | *(empty)* | Public origin for canonical URLs, sitemap and analytics |
+| `VITE_ANALYTICS_ID` | *(empty)* | `G-...` for GA4, or your domain for Plausible |
+
+`SITE_URL` is applied at **serve time** in single-service mode: pre-rendered HTML
+contains a placeholder origin and the backend swaps it for your real domain. When the
+frontend is on a separate host, set `VITE_SITE_URL` at build time instead.
 
 ---
 
@@ -229,9 +237,16 @@ docker compose up --build
 # open http://localhost:8000
 ```
 
-Full guides for **Render**, **Railway** and a **VPS with Nginx and HTTPS** are in
-[DEPLOYMENT.md](DEPLOYMENT.md). The SEO launch checklist is in
-[SEO_CHECKLIST.md](SEO_CHECKLIST.md).
+Or deploy the two halves separately, which is what most people do:
+
+- **Frontend → Vercel** (static, free). Set the project **Root Directory** to
+  `frontend`, then add `VITE_API_URL` and `VITE_SITE_URL` as environment variables.
+- **Backend → Render** using `Dockerfile.backend`, with `ALLOWED_ORIGINS` pointing at
+  the Vercel domain.
+
+Step-by-step instructions, including the exact variable values and the CORS step that
+people usually miss, are in [DEPLOYMENT.md](DEPLOYMENT.md). The SEO launch checklist is
+in [SEO_CHECKLIST.md](SEO_CHECKLIST.md).
 
 ---
 

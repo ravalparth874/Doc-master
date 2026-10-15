@@ -1,12 +1,17 @@
-# Render blueprint for DOC Master.
-# Create a Blueprint from the repository root: render.yaml is picked up automatically.
+# Render blueprint for the DOC Master API.
+#
+# This service exposes /api only. Host the frontend on Vercel (or any static
+# host) and point it at this API with VITE_API_URL.
+#
+# If you would rather serve everything from one service, change
+# `dockerfilePath` to ./Dockerfile.
 
 services:
   - type: web
-    name: doc-master
+    name: doc-master-api
     runtime: docker
-    dockerfilePath: ./Dockerfile
-    plan: starter # the free plan has a 100 MB memory limit, fine for small files
+    dockerfilePath: ./Dockerfile.backend
+    plan: starter # the free plan has 512 MB RAM, fine for documents up to ~10 MB
     region: singapore # change to oregon / frankfurt / virginia as needed
     branch: main
     healthCheckPath: /api/health
@@ -20,11 +25,19 @@ services:
         value: "120"
       - key: MAX_FILES
         value: "20"
-      - key: SITE_URL
-        sync: false # set your real domain in the Render dashboard
-      - key: ALLOWED_ORIGINS
-        sync: false # set your real domain, for example https://docmaster.app
       - key: RATE_LIMIT
         value: "20/minute"
+
+      # Set these in the Render dashboard.
+      # ALLOWED_ORIGINS accepts a comma separated list, or "*" to allow any
+      # origin (the API is public and never uses cookies).
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Handy if you deploy preview branches on Vercel, which get random domains:
+      # ALLOWED_ORIGIN_REGEX=https://doc-master.*\.vercel\.app
+      - key: ALLOWED_ORIGIN_REGEX
+        sync: false
+      - key: SITE_URL
+        sync: false
       - key: ANALYTICS_ID
         sync: false # leave empty to collect no analytics

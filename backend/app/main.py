@@ -55,9 +55,16 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # --- Middleware ---------------------------------------------------------------
+# ``ALLOWED_ORIGINS=*`` allows any origin, which is reasonable here because the
+# API is public, returns no cookies and never uses credentials. For a Vercel
+# frontend, prefer ``ALLOWED_ORIGIN_REGEX=https://.*\.vercel\.app`` so preview
+# deployments work without opening the API to every site on the internet.
+_allow_all = "*" in _settings.allowed_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(_settings.allowed_origins),
+    allow_origins=["*"] if _allow_all else list(_settings.allowed_origins),
+    allow_origin_regex=None if _allow_all else _settings.allowed_origin_regex,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
@@ -158,7 +165,11 @@ def _read_text(path: Path) -> str:
 
 
 def _analytics_snippet(settings: Settings) -> str:
-    """Build the optional analytics snippet from ``ANALYTICS_ID``."""
+    """Build the optional analytics snippet from ``ANALYTICS_ID``.
+
+    Every tag carries ``data-analytics`` so the frontend loader can see that the
+    snippet is already in place and does not inject a second copy.
+    """
 
     analytics_id = re.sub(r"[^A-Za-z0-9._-]", "", settings.analytics_id)
     if not analytics_id:
@@ -166,9 +177,9 @@ def _analytics_snippet(settings: Settings) -> str:
     if analytics_id.startswith("G-"):
         return (
             '<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>'
-            '<script async src="https://www.googletagmanager.com/gtag/js?id='
-            f'{analytics_id}"></script>'
-            "<script>window.dataLayer=window.dataLayer||[];"
+            f"<script data-analytics async "
+            f'src="https://www.googletagmanager.com/gtag/js?id={analytics_id}"></script>'
+            "<script data-analytics>window.dataLayer=window.dataLayer||[];"
             "function gtag(){dataLayer.push(arguments)}"
             'gtag("js",new Date());'
             f'gtag("config","{analytics_id}");</script>'
@@ -177,8 +188,8 @@ def _analytics_snippet(settings: Settings) -> str:
     domain = analytics_id if "." in analytics_id else host
     return (
         '<link rel="preconnect" href="https://plausible.io" crossorigin>'
-        f'<script defer data-domain="{domain}" src="https://plausible.io/js/script.js">'
-        "</script>"
+        f'<script data-analytics defer data-domain="{domain}" '
+        'src="https://plausible.io/js/script.js"></script>'
     )
 
 
@@ -213,7 +224,7 @@ def _cache_control(full_path: str, suffix: str) -> str:
 
 
 def _missing_frontend_page(settings: Settings) -> HTMLResponse:
-    """Explain how to build the frontend when ``dist`` is absent."""
+    """Explain the setup when ``dist`` is not present."""
 
     return HTMLResponse(
         content=(
@@ -224,11 +235,13 @@ def _missing_frontend_page(settings: Settings) -> HTMLResponse:
             '</head><body style="font-family:system-ui;max-width:40rem;margin:4rem auto;'
             'padding:0 1rem;line-height:1.6">'
             "<h1>DOC Master API is running</h1>"
-            "<p>The frontend has not been built yet. Run "
-            "<code>npm install &amp;&amp; npm run build</code> inside "
-            "<code>frontend/</code>, then reload this page.</p>"
-            "<p>The API is available under <code>/api</code> and the health "
-            "check at <code>/api/health</code>.</p>"
+            "<p>This server handles the PDF tools only. The interface is served "
+            "separately, for example from Vercel.</p>"
+            "<p>If you meant to run everything from one service, build the frontend "
+            "with <code>npm install &amp;&amp; npm run build</code> inside "
+            "<code>frontend/</code> so that <code>dist/</code> exists next to the API.</p>"
+            "<p>The health check is at <code>/api/health</code> and the interactive "
+            "documentation at <code>/api/docs</code>.</p>"
             f"<p>Looking for: <code>{settings.frontend_dist}</code></p>"
             "</body></html>"
         ),

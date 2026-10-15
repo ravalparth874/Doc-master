@@ -81,6 +81,16 @@ jobs:
           test -f dist/compress-pdf/index.html
           grep -q "<h1" dist/compress-pdf/index.html
 
+      - name: Build in static hosting mode (Vercel, Netlify)
+        env:
+          VITE_API_URL: https://api.example.com
+          VITE_SITE_URL: https://example.com
+        run: |
+          npm run build
+          grep -q 'https://example.com/merge-pdf' dist/merge-pdf/index.html
+          grep -q 'https://example.com/sitemap.xml' dist/robots.txt
+          grep -rq 'https://api.example.com' dist/assets
+
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:

@@ -11,12 +11,24 @@ import { fileURLToPath } from 'node:url'
 const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '..')
 
-/** Placeholder origin. The backend rewrites it to `SITE_URL` while serving. */
+/** Fallback origin, rewritten by the backend when it serves the frontend. */
 const TOKEN_ORIGIN = 'https://docmaster.example'
+
+/**
+ * Origin used inside robots.txt and sitemap.xml.
+ *
+ * On a static host (Vercel) this comes from VITE_SITE_URL or SITE_URL at build
+ * time. When the frontend is served by FastAPI the placeholder origin is used
+ * instead, and the backend swaps it for SITE_URL while it serves the file.
+ */
+const ORIGIN = (process.env.SITE_URL || process.env.VITE_SITE_URL || TOKEN_ORIGIN).replace(
+  /\/$/,
+  '',
+)
 
 const routesFile = resolve(root, 'routes.json')
 const routes = JSON.parse(readFileSync(routesFile, 'utf8'))
-const base = TOKEN_ORIGIN.replace(/\/$/, '')
+const base = ORIGIN
 const today = new Date().toISOString().slice(0, 10)
 
 const entries = routes

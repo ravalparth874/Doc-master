@@ -6,7 +6,15 @@
  * caller and can be released as soon as the download starts.
  */
 
-const API_BASE = '/api'
+/**
+ * Base URL of the DOC Master API.
+ *
+ * Defaults to `/api`, which is correct when FastAPI serves this frontend (and in
+ * development, where Vite proxies `/api` to the local backend). When the two are
+ * deployed separately, set `VITE_API_URL` to the backend origin at build time,
+ * for example `https://doc-master-api.onrender.com`.
+ */
+const API_BASE = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '')
 
 /** Error carrying the friendly `detail` message returned by the backend. */
 export class ApiError extends Error {

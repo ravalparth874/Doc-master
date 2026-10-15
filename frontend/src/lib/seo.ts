@@ -13,8 +13,21 @@ export const SITE_NAME = 'DOC Master'
 
 export const TAGLINE = 'All your PDF tools in one place. Free, fast and private.'
 
-/** The public origin of the site. */
+/**
+ * The public origin of the site.
+ *
+ * Three deployment shapes are supported:
+ *
+ * 1. Separate hosts (Vercel + Render): set `VITE_SITE_URL` at build time.
+ * 2. One service (FastAPI serves `dist`): leave it unset. Pre-rendered HTML
+ *    keeps the placeholder origin and the backend swaps it for `SITE_URL`.
+ * 3. Static hosting: same as (1), the value is baked into the files.
+ */
 export function siteOrigin(): string {
+  const configured = import.meta.env.VITE_SITE_URL
+  if (configured) {
+    return configured.replace(/\/$/, '')
+  }
   if (typeof window !== 'undefined' && window.location?.origin) {
     return window.location.origin
   }

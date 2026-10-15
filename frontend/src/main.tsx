@@ -12,11 +12,13 @@ import './index.css'
 import { App } from './App'
 import i18n from './i18n'
 import { applyDocumentLanguage } from './i18n'
+import { loadAnalytics } from './lib/analytics'
 import { applyTheme, storedTheme } from './lib/theme'
 import { appRoutes, fallbackRoute } from './router/clientRoutes'
 
 applyTheme(storedTheme())
 applyDocumentLanguage(i18n.language)
+loadAnalytics()
 
 const container = document.getElementById('root')
 

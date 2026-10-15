@@ -80,6 +80,7 @@ class Settings:
     rate_limit: str
     rate_limit_disabled: bool
     allowed_origins: tuple[str, ...]
+    allowed_origin_regex: str | None
     site_url: str
     analytics_id: str
     port: int
@@ -119,6 +120,7 @@ def get_settings() -> Settings:
         rate_limit=os.getenv("RATE_LIMIT", "20/minute"),
         rate_limit_disabled=_env_bool("RATE_LIMIT_DISABLED", False),
         allowed_origins=_env_list("ALLOWED_ORIGINS", DEFAULT_ALLOWED_ORIGINS),
+        allowed_origin_regex=os.getenv("ALLOWED_ORIGIN_REGEX", "").strip() or None,
         site_url=os.getenv("SITE_URL", "https://docmaster.example").rstrip("/"),
         analytics_id=os.getenv("ANALYTICS_ID", "").strip(),
         port=_env_int("PORT", 8000),

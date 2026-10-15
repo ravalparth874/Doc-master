@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Frontend for DOC Master, a free and privacy-first online PDF toolkit.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
