@@ -11,6 +11,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  vercel-config:
+    name: Vercel services config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate vercel.json
+        run: |
+          node -e "
+            const config = require('./vercel.json');
+            const services = Object.keys(config.services || {});
+            if (!services.includes('backend') || !services.includes('frontend')) {
+              throw new Error('Expected backend and frontend services, got: ' + services);
+            }
+            if (config.services.backend.root !== 'backend' || config.services.backend.entrypoint !== 'main:app') {
+              throw new Error('backend service must use root=backend and entrypoint=main:app');
+            }
+            const rewrites = config.rewrites || [];
+            const api = rewrites.find((r) => r.source === '/api/(.*)');
+            const catchAll = rewrites.filter((r) => r.source === '/(.*)');
+            if (!api || api.destination.service !== 'backend') {
+              throw new Error('/api/(.*) must route to the backend service');
+            }
+            if (catchAll.length !== 1 || catchAll[0].destination.service !== 'frontend') {
+              throw new Error('Exactly one catch-all rewrite to frontend is required');
+            }
+            if (rewrites.indexOf(api) > rewrites.indexOf(catchAll[0])) {
+              throw new Error('The /api rewrite must come before the catch-all');
+            }
+            console.log('vercel.json OK ->', services.join(', '));
+          "
+
+      - name: Backend entrypoint is importable as main:app
+        working-directory: backend
+        run: python -c "from main import app; assert app.routes; print('main:app resolves to', type(app).__name__)"
+
   backend:
     name: Backend tests and lint
     runs-on: ubuntu-latest

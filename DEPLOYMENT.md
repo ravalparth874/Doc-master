@@ -1,24 +1,106 @@
 # Deployment guide
 
-DOC Master ships as **one service**: FastAPI serves `/api/*` and the pre-rendered React
-frontend from the same process, so there is no second server to configure.
+The app has three supported shapes:
 
-You can also split it across two providers, which is what most people end up doing:
-the static frontend on **Vercel** and the API on **Render**.
+1. **[Vercel Services](#1-vercel-services-one-project-one-domain)** - one Vercel project
+   containing both the frontend and the API, on one domain. No CORS, no second account.
+2. [Vercel + Render](#2-vercel--render-split-hosting) - static frontend on Vercel, Python
+   API on Render.
+3. [One service](#3-single-service) - FastAPI serves the API *and* the built frontend, on
+   Render, Railway or a VPS.
 
-Pick one of the options below.
+Pick one of the following guides:
 
-- [Vercel + Render (split hosting)](#1-vercel--render-split-hosting)
-- [Render (all in one)](#2-render)
-- [Railway](#3-railway)
-- [VPS with Nginx and HTTPS](#4-vps-nginx--certbot)
+- [Vercel Services (one project, one domain)](#1-vercel-services-one-project-one-domain)
+- [Vercel + Render (split hosting)](#2-vercel--render-split-hosting)
+- [Single service](#3-single-service)
+- [Railway](#4-railway)
+- [VPS with Nginx and HTTPS](#5-vps-nginx--certbot)
 - [Environment variables](#environment-variables)
 - [Upload size limits](#upload-size-limits)
 - [After deploying](#after-deploying)
 
 ---
 
-## 1. Vercel + Render (split hosting)
+## 1. Vercel Services (one project, one domain)
+
+`vercel.json` in the repository root defines two services, and the whole app is served
+from a single domain:
+
+| Request | Goes to |
+| --- | --- |
+| `/api/merge`, `/api/health`, `/api/contact`, ... | the `backend` service (FastAPI) |
+| everything else, including `/`, `/merge-pdf`, `/assets/...` | the `frontend` service (Vite) |
+
+Because the browser calls the API on the **same origin** through the `/api` path, there
+is no CORS configuration to get wrong and no cross-origin upload. The API also never
+needs a public hostname of its own.
+
+### 1.1 Deploy
+
+1. Push the repository to GitHub.
+2. In Vercel choose **Add New → Project** and import the repository.
+3. **Do not set a root directory.** The root `vercel.json` defines both services, and
+   Vercel needs the repository root to see it.
+4. Framework preset: **Other**. Vercel reads `services` from `vercel.json` and builds
+   both services.
+5. Add environment variables (Settings → Environment Variables). They are shared by
+   every service in the project:
+   - `SITE_URL` - `https://your-domain.com` (used for analytics defaults)
+   - `MAX_FILE_MB` - `15` is a good starting point on the Hobby plan, see below
+   - `MAX_TOTAL_MB` - `50`
+   - `RATE_LIMIT` - `20/minute`
+   - `VITE_SITE_URL` - `https://your-domain.com`
+   - `VITE_ANALYTICS_ID` - optional, empty for none
+   - `ALLOWED_ORIGINS` - leave empty: same-origin requests do not need CORS
+6. Deploy. Both services build; the frontend build also pre-renders all 12 routes.
+7. Attach your domain in **Settings → Domains**.
+
+You do **not** need `VITE_API_URL` here. The frontend keeps calling `/api/...` and the
+top-level rewrite routes those requests to the Python service.
+
+### 1.2 Test locally before deploying
+
+```bash
+npx vercel@latest dev -L     # -L runs without logging in to Vercel
+```
+
+`vercel dev` starts both services together and injects binding variables, so the same
+routing applies locally.
+
+### 1.3 Limits worth knowing
+
+Vercel runs the Python service as a function, which changes a few defaults:
+
+| Concern | What to do |
+| --- | --- |
+| Execution time | Compressing a large PDF can take several seconds. The Hobby plan caps functions at a short duration, so heavy jobs may time out. Use a paid plan, or lower `MAX_FILE_MB` to 10-15. |
+| Memory | The whole upload is held in memory. Keep `MAX_TOTAL_MB` well under the function memory limit; 50 MB is a safe default. |
+| Cold starts | The first request after an idle period starts a fresh instance. `/api/health` is a cheap way to warm it. |
+| No disk | This suits DOC Master: everything is in memory and discarded, and nothing survives the request anyway. |
+| Bundle size | PyMuPDF, Pillow, pypdf and cryptography are large but within the function size limit. |
+
+### 1.4 Why there are no bindings
+
+A `bindings` entry would let one service call another over Vercel's internal network,
+for example:
+
+```json
+"bindings": [{ "type": "service", "service": "backend", "format": "url", "env": "API_URL" }]
+```
+
+This repository does not use one, and it is worth being explicit about why. Bindings are
+injected into **server-side functions at runtime**, and our frontend is a static Vite
+bundle: there is no function to inject into, and `import.meta.env` values are inlined at
+**build time**, long before any binding would resolve. A binding here would be an env
+var that nothing reads.
+
+The browser-to-API call is a public, same-origin request, and the top-level
+`/api/(.*)` rewrite already routes it. That is the correct path for this app.
+
+---
+
+## 2. Vercel + Render (split hosting)
 
 Two projects, one repository. The frontend is static, so Vercel's free plan is
 enough; the API needs a Python runtime, so Render's free plan works for documents up to
@@ -101,7 +183,11 @@ Test the result by opening the frontend and processing a file.
 
 ---
 
-## 2. Render (all in one)
+## 3. Single service
+
+FastAPI serves `/api/*` **and** the pre-rendered frontend from one process. Nothing to
+route, nothing to configure. `render.yaml` in the repository root is a Render Blueprint
+for this setup.
 
 `render.yaml` in the repository root is a Render Blueprint, so Render can do everything
 for you.
@@ -131,7 +217,7 @@ for you.
 
 ---
 
-## 3. Railway
+## 4. Railway
 
 1. Install the CLI: `npm i -g @railway/cli`, then `railway login`.
 2. From the repository root:
@@ -153,18 +239,18 @@ for you.
 
 ---
 
-## 4. VPS, Nginx and HTTPS (Certbot)
+## 5. VPS, Nginx and HTTPS (Certbot)
 
 Works on any Ubuntu/Debian server: Hetzner, DigitalOcean, Linode, Lightsail.
 
-### 4.1 Install Docker
+### 5.1 Install Docker
 
 ```bash
 curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker "$USER" && newgrp docker
 ```
 
-### 4.2 Get the code and run the container
+### 5.2 Get the code and run the container
 
 ```bash
 git clone https://github.com/your-name/doc-master.git
@@ -184,7 +270,7 @@ docker compose up -d --build
 docker compose ps          # should show "healthy"
 ```
 
-### 4.3 Nginx reverse proxy
+### 5.3 Nginx reverse proxy
 
 ```nginx
 server {
@@ -236,7 +322,7 @@ server {
 }
 ```
 
-### 4.4 HTTPS with Certbot
+### 5.4 HTTPS with Certbot
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
@@ -249,7 +335,7 @@ sudo certbot renew --dry-run
 Certbot rewrites the Nginx config to redirect HTTP to HTTPS. The app then adds
 `Strict-Transport-Security` because it sees `X-Forwarded-Proto: https`.
 
-### 4.5 Keep it running
+### 5.5 Keep it running
 
 ```bash
 # automatic restarts are already handled by the restart policy in docker-compose.yml
@@ -277,9 +363,12 @@ sudo systemctl enable --now docker
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `VITE_API_URL` | **yes** for split hosting | Full API origin, no trailing slash: `https://doc-master-api.onrender.com`. Leave empty for single-service mode. |
-| `VITE_SITE_URL` | **yes** for split hosting | Public origin, used for canonical URLs, Open Graph tags and the sitemap. |
+| `VITE_API_URL` | only for split hosting | Full API origin, no trailing slash: `https://doc-master-api.onrender.com`. **Leave empty for Vercel Services**, where the `/api` rewrite keeps everything on one origin. |
+| `VITE_SITE_URL` | **yes** for any separate host | Public origin, used for canonical URLs, Open Graph tags and the sitemap. |
 | `VITE_ANALYTICS_ID` | no | `G-XXXXXXXXXX` or your Plausible domain. Empty means no analytics. |
+
+In services mode Vercel shares one set of project environment variables across both
+services, so the `VITE_*` values and the API variables live in the same list.
 
 `backend/.env` and `frontend/.env` are read automatically for local development. Copy
 the two `.env.example` files to get started.
@@ -312,10 +401,11 @@ files work comfortably. Each worker holds the request in memory, so set
 
 ## After deploying
 
-1. `curl https://your-api-host/api/health` should return
-   `{"status":"ok","service":"DOC Master","version":"1.0.0"}`.
-2. Open the frontend, pick **Merge PDF** and upload two files. If the browser console
-   shows a CORS error, `ALLOWED_ORIGINS` does not match the frontend origin.
+1. `https://your-site/api/health` should return
+   `{"status":"ok","service":"DOC Master","version":"1.0.0"}`. On a split deployment use
+   the API host instead.
+2. Open the frontend, pick **Merge PDF** and upload two files. On a split deployment, a
+   CORS error in the console means `ALLOWED_ORIGINS` does not match the frontend origin.
 3. `https://your-site/robots.txt` exists and the sitemap URL uses your domain.
 4. Fetch a tool page (`https://your-site/merge-pdf`) and check that **View Source**
    shows the full text and your domain in the canonical tag.

@@ -232,21 +232,28 @@ frontend is on a separate host, set `VITE_SITE_URL` at build time instead.
 
 ## Deployment
 
+**Vercel Services (recommended).** One Vercel project, one domain. The root
+`vercel.json` declares two services: the Vite frontend at `/` and the FastAPI backend at
+`/api/*`. Import the repo, leave the root directory unset, add `VITE_SITE_URL` plus the
+usual API variables, deploy. Because both live on one origin there is no CORS to
+configure.
+
 ```bash
-docker compose up --build
-# open http://localhost:8000
+# optional: run both services locally exactly as Vercel routes them
+npx vercel@latest dev -L
 ```
 
-Or deploy the two halves separately, which is what most people do:
+**Alternatively**, host everything from FastAPI alone:
 
-- **Frontend → Vercel** (static, free). Set the project **Root Directory** to
-  `frontend`, then add `VITE_API_URL` and `VITE_SITE_URL` as environment variables.
-- **Backend → Render** using `Dockerfile.backend`, with `ALLOWED_ORIGINS` pointing at
-  the Vercel domain.
+```bash
+docker compose up --build     # open http://localhost:8000
+```
 
-Step-by-step instructions, including the exact variable values and the CORS step that
-people usually miss, are in [DEPLOYMENT.md](DEPLOYMENT.md). The SEO launch checklist is
-in [SEO_CHECKLIST.md](SEO_CHECKLIST.md).
+or split the two halves across Vercel and Render (`Dockerfile.backend`).
+
+Step-by-step instructions for all three shapes are in
+[DEPLOYMENT.md](DEPLOYMENT.md). The SEO launch checklist is in
+[SEO_CHECKLIST.md](SEO_CHECKLIST.md).
 
 ---
 
